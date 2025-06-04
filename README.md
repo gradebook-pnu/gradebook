@@ -252,3 +252,97 @@ This document outlines the functional requirements for the Gradebook microservic
 *   **As an administrator,** I want to be able to access and review these audit logs, so that I can investigate activities within the system.
 
 ---
+
+#  Gradebook System — REST API Endpoints
+
+---
+
+##  Identity Service
+
+| Метод | Endpoint         | Опис                          | Payload                   | Ролі |
+|-------|------------------|-------------------------------|---------------------------|------|
+| POST  | /auth/register   | Реєстрація користувача        | { email, password }       | —    |
+| POST  | /auth/login      | Вхід користувача              | { email, password }       | —    |
+| POST  | /auth/refresh    | Оновлення JWT токена          | —                         | —    |
+
+---
+
+##  User Profile Service
+
+| Метод | Endpoint               | Опис                            | Payload                  | Ролі |
+|-------|------------------------|---------------------------------|--------------------------|------|
+| GET   | /users/:id             | Отримати профіль користувача    | —                        | ВСІ  |
+| PUT   | /users/:id             | Оновити профіль користувача     | { name, email, role }    | ВСІ  |
+| PUT   | /users/:id/avatar      | Завантажити аватар              | файл (multipart/form)    | ВСІ  |
+
+---
+
+##  Subject Service
+
+| Метод | Endpoint                   | Опис                                     | Payload                         | Ролі      |
+|-------|----------------------------|------------------------------------------|----------------------------------|-----------|
+| GET   | /subjects                  | Отримати всі предмети                    | —                                | ВСІ       |
+| POST  | /subjects                  | Створити новий предмет                   | { title, credits, semester }     | TEACHER   |
+| GET   | /subjects/:id             | Отримати інформацію про предмет          | —                                | ВСІ       |
+| PUT   | /subjects/:id             | Оновити предмет                          | { title, credits, semester }     | TEACHER   |
+| GET   | /subjects/:id/teachers    | Отримати викладачів предмету             | —                                | ВСІ       |
+| POST  | /subjects/:id/teachers    | Додати викладача до предмету             | { teacherId }                    | TEACHER   |
+
+---
+
+##  Enrollment Service
+
+| Метод | Endpoint                        | Опис                                          | Payload                    | Ролі        |
+|-------|----------------------------------|-----------------------------------------------|-----------------------------|-------------|
+| POST  | /enrollments                     | Записатися на предмет                         | { studentId, subjectId }    | STUDENT     |
+| GET   | /enrollments/:id                | Отримати інформацію про реєстрацію            | —                           | STUDENT     |
+| DELETE| /enrollments/:id                | Вийти з предмету                              | —                           | STUDENT     |
+| GET   | /students/:id/subjects          | Отримати список предметів студента            | —                           | STUDENT     |
+| GET   | /subjects/:id/students          | Отримати список студентів у предметі          | —                           | TEACHER     |
+
+---
+
+##  Grade Service
+
+| Метод | Endpoint                        | Опис                                              | Payload                                      | Ролі     |
+|-------|----------------------------------|---------------------------------------------------|-----------------------------------------------|----------|
+| POST  | /grades                          | Призначити оцінку                                 | { studentId, subjectId, grade, teacherId }     | TEACHER  |
+| PUT   | /grades/:id                      | Оновити оцінку                                    | { grade }                                     | TEACHER  |
+| DELETE| /grades/:id                      | Видалити оцінку                                   | —                                             | TEACHER  |
+| GET   | /grades/:id                      | Отримати оцінку                                   | —                                             | STUDENT/TEACHER |
+| GET   | /students/:id/grades             | Переглянути всі оцінки студента                   | —                                             | STUDENT/TEACHER |
+
+---
+
+##  Notification Service
+
+| Метод | Endpoint         | Опис                                 | Payload                             | Ролі  |
+|-------|------------------|--------------------------------------|--------------------------------------|-------|
+| GET   | /notifications   | Отримати всі повідомлення користувача | —                                    | ВСІ   |
+
+*Автоматичні події:*  
+- `EnrollmentCreated` → надсилає повідомлення про успішну реєстрацію  
+- `GradeAssigned/Updated` → повідомлення про оцінку
+
+---
+
+##  Audit Logging Service (Internal)
+
+| Метод | Endpoint     | Опис                              | Payload                              | Доступ |
+|-------|--------------|-----------------------------------|---------------------------------------|--------|
+| GET   | /audit       | Отримати журнали змін             | —                                     | ADMIN  |
+
+*Автоматичні події:*  
+- Створення користувача  
+- Призначення/зміна оцінки  
+- Редагування предметів
+
+---
+
+##  Інше
+
+- Всі запити вимагають JWT-токен аутентифікації (крім `/auth/*`)
+- Підтримка ролей: STUDENT, TEACHER, ADMINISTRATOR
+- Метричні дані: доступні через Prometheus
+- Логи: централізовано зберігаються в ELK
+
