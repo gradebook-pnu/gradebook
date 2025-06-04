@@ -124,8 +124,61 @@ graph TD
     AuditService --> ELKStack
 ```
 
+### erDiagram
 
+```mermaid
+erDiagram
+    USERS {
+        UUID id PK
+        string name
+        string email
+        enum role  "STUDENT | TEACHER"
+        datetime created_at
+    }
 
+    STUDENTS {
+        UUID user_id PK, FK
+        string student_number
+    }
+
+    TEACHERS {
+        UUID user_id PK, FK
+        string department
+    }
+
+    SUBJECTS {
+        UUID id PK
+        string title
+        int credits
+        UUID teacher_id FK
+    }
+
+    ENROLLMENTS {
+        UUID id PK
+        UUID student_id FK
+        UUID subject_id FK
+        datetime enrolled_at
+    }
+
+    GRADES {
+        UUID id PK
+        UUID student_id FK
+        UUID subject_id FK
+        UUID teacher_id FK
+        float grade
+        datetime date_assigned
+    }
+
+    %% Relationships
+    USERS ||--|| STUDENTS : has
+    USERS ||--|| TEACHERS : has
+    TEACHERS ||--o{ SUBJECTS : teaches
+    STUDENTS ||--o{ ENROLLMENTS : enrolls
+    SUBJECTS ||--o{ ENROLLMENTS : has
+    STUDENTS ||--o{ GRADES : receives
+    TEACHERS ||--o{ GRADES : assigns
+    SUBJECTS ||--o{ GRADES : graded_for
+```
 
 # Gradebook Microservices System - Requirements
 
