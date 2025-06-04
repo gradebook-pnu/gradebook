@@ -253,96 +253,95 @@ This document outlines the functional requirements for the Gradebook microservic
 
 ---
 
-#  Gradebook System — REST API Endpoints
+# Gradebook System — REST API Endpoints
 
 ---
 
-##  Identity Service
+## Identity Service
 
-| Метод | Endpoint         | Опис                          | Payload                   | Ролі |
-|-------|------------------|-------------------------------|---------------------------|------|
-| POST  | /auth/register   | Реєстрація користувача        | { email, password }       | —    |
-| POST  | /auth/login      | Вхід користувача              | { email, password }       | —    |
-| POST  | /auth/refresh    | Оновлення JWT токена          | —                         | —    |
-
----
-
-##  User Profile Service
-
-| Метод | Endpoint               | Опис                            | Payload                  | Ролі |
-|-------|------------------------|---------------------------------|--------------------------|------|
-| GET   | /users/:id             | Отримати профіль користувача    | —                        | ВСІ  |
-| PUT   | /users/:id             | Оновити профіль користувача     | { name, email, role }    | ВСІ  |
-| PUT   | /users/:id/avatar      | Завантажити аватар              | файл (multipart/form)    | ВСІ  |
+| Method | Endpoint         | Description                      | Payload                   | Roles |
+|--------|------------------|----------------------------------|---------------------------|-------|
+| POST   | /auth/register   | Register a new user              | { email, password }       | —     |
+| POST   | /auth/login      | Log in a user                    | { email, password }       | —     |
+| POST   | /auth/refresh    | Refresh JWT token                | —                         | —     |
 
 ---
 
-##  Subject Service
+## User Profile Service
 
-| Метод | Endpoint                   | Опис                                     | Payload                         | Ролі      |
-|-------|----------------------------|------------------------------------------|----------------------------------|-----------|
-| GET   | /subjects                  | Отримати всі предмети                    | —                                | ВСІ       |
-| POST  | /subjects                  | Створити новий предмет                   | { title, credits, semester }     | TEACHER   |
-| GET   | /subjects/:id             | Отримати інформацію про предмет          | —                                | ВСІ       |
-| PUT   | /subjects/:id             | Оновити предмет                          | { title, credits, semester }     | TEACHER   |
-| GET   | /subjects/:id/teachers    | Отримати викладачів предмету             | —                                | ВСІ       |
-| POST  | /subjects/:id/teachers    | Додати викладача до предмету             | { teacherId }                    | TEACHER   |
+| Method | Endpoint               | Description                        | Payload                  | Roles |
+|--------|------------------------|------------------------------------|--------------------------|-------|
+| GET    | /users/:id             | Get user profile                   | —                        | ALL   |
+| PUT    | /users/:id             | Update user profile                | { name, email, role }    | ALL   |
+| PUT    | /users/:id/avatar      | Upload avatar                      | file (multipart/form)    | ALL   |
 
 ---
 
-##  Enrollment Service
+## Subject Service
 
-| Метод | Endpoint                        | Опис                                          | Payload                    | Ролі        |
-|-------|----------------------------------|-----------------------------------------------|-----------------------------|-------------|
-| POST  | /enrollments                     | Записатися на предмет                         | { studentId, subjectId }    | STUDENT     |
-| GET   | /enrollments/:id                | Отримати інформацію про реєстрацію            | —                           | STUDENT     |
-| DELETE| /enrollments/:id                | Вийти з предмету                              | —                           | STUDENT     |
-| GET   | /students/:id/subjects          | Отримати список предметів студента            | —                           | STUDENT     |
-| GET   | /subjects/:id/students          | Отримати список студентів у предметі          | —                           | TEACHER     |
-
----
-
-##  Grade Service
-
-| Метод | Endpoint                        | Опис                                              | Payload                                      | Ролі     |
-|-------|----------------------------------|---------------------------------------------------|-----------------------------------------------|----------|
-| POST  | /grades                          | Призначити оцінку                                 | { studentId, subjectId, grade, teacherId }     | TEACHER  |
-| PUT   | /grades/:id                      | Оновити оцінку                                    | { grade }                                     | TEACHER  |
-| DELETE| /grades/:id                      | Видалити оцінку                                   | —                                             | TEACHER  |
-| GET   | /grades/:id                      | Отримати оцінку                                   | —                                             | STUDENT/TEACHER |
-| GET   | /students/:id/grades             | Переглянути всі оцінки студента                   | —                                             | STUDENT/TEACHER |
+| Method | Endpoint                   | Description                                 | Payload                         | Roles    |
+|--------|----------------------------|---------------------------------------------|----------------------------------|----------|
+| GET    | /subjects                  | Get all subjects                            | —                                | ALL      |
+| POST   | /subjects                  | Create a new subject                        | { title, credits, semester }     | TEACHER  |
+| GET    | /subjects/:id             | Get subject details                         | —                                | ALL      |
+| PUT    | /subjects/:id             | Update subject                              | { title, credits, semester }     | TEACHER  |
+| GET    | /subjects/:id/teachers    | Get subject's teachers                      | —                                | ALL      |
+| POST   | /subjects/:id/teachers    | Add teacher to subject                      | { teacherId }                    | TEACHER  |
 
 ---
 
-##  Notification Service
+## Enrollment Service
 
-| Метод | Endpoint         | Опис                                 | Payload                             | Ролі  |
-|-------|------------------|--------------------------------------|--------------------------------------|-------|
-| GET   | /notifications   | Отримати всі повідомлення користувача | —                                    | ВСІ   |
-
-*Автоматичні події:*  
-- `EnrollmentCreated` → надсилає повідомлення про успішну реєстрацію  
-- `GradeAssigned/Updated` → повідомлення про оцінку
-
----
-
-##  Audit Logging Service (Internal)
-
-| Метод | Endpoint     | Опис                              | Payload                              | Доступ |
-|-------|--------------|-----------------------------------|---------------------------------------|--------|
-| GET   | /audit       | Отримати журнали змін             | —                                     | ADMIN  |
-
-*Автоматичні події:*  
-- Створення користувача  
-- Призначення/зміна оцінки  
-- Редагування предметів
+| Method | Endpoint                        | Description                                      | Payload                    | Roles    |
+|--------|----------------------------------|--------------------------------------------------|-----------------------------|-----------|
+| POST   | /enrollments                     | Enroll in a subject                              | { studentId, subjectId }    | STUDENT   |
+| GET    | /enrollments/:id                | Get enrollment information                       | —                           | STUDENT   |
+| DELETE | /enrollments/:id                | Unenroll from a subject                          | —                           | STUDENT   |
+| GET    | /students/:id/subjects          | Get student’s subjects                           | —                           | STUDENT   |
+| GET    | /subjects/:id/students          | Get students in a subject                        | —                           | TEACHER   |
 
 ---
 
-##  Інше
+## Grade Service
 
-- Всі запити вимагають JWT-токен аутентифікації (крім `/auth/*`)
-- Підтримка ролей: STUDENT, TEACHER, ADMINISTRATOR
-- Метричні дані: доступні через Prometheus
-- Логи: централізовано зберігаються в ELK
+| Method | Endpoint                        | Description                                         | Payload                                      | Roles            |
+|--------|----------------------------------|-----------------------------------------------------|-----------------------------------------------|------------------|
+| POST   | /grades                          | Assign a grade                                      | { studentId, subjectId, grade, teacherId }     | TEACHER          |
+| PUT    | /grades/:id                      | Update a grade                                      | { grade }                                     | TEACHER          |
+| DELETE | /grades/:id                      | Delete a grade                                      | —                                             | TEACHER          |
+| GET    | /grades/:id                      | Get grade details                                   | —                                             | STUDENT/TEACHER  |
+| GET    | /students/:id/grades             | View all student’s grades                           | —                                             | STUDENT/TEACHER  |
 
+---
+
+## Notification Service
+
+| Method | Endpoint         | Description                            | Payload                             | Roles |
+|--------|------------------|----------------------------------------|--------------------------------------|-------|
+| GET    | /notifications   | Get all user notifications             | —                                    | ALL   |
+
+*Automatic Events:*  
+- `EnrollmentCreated` → sends notification for successful enrollment  
+- `GradeAssigned/Updated` → sends notification for grade change
+
+---
+
+## Audit Logging Service (Internal)
+
+| Method | Endpoint     | Description                        | Payload                              | Access |
+|--------|--------------|------------------------------------|---------------------------------------|--------|
+| GET    | /audit       | View change logs                   | —                                     | ADMIN  |
+
+*Automatic Events:*  
+- User registration  
+- Grade assignment/update  
+- Subject updates
+
+---
+
+## Other
+
+- All requests require JWT authentication (except `/auth/*`)
+- Supported roles: STUDENT, TEACHER, ADMINISTRATOR
+- Metrics are available via Prometheus
+- Logs are centrally stored in the ELK stack
